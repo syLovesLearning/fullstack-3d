@@ -46,29 +46,10 @@ class WarehouseZoneItem(BaseModel):
     occupied: int
 
 
-<<<<<<< HEAD
-SlotStatus = Literal["empty", "occupied", "maintenance", "locked"]
-
-
-class SlotStats(BaseModel):
-    total: int
-    occupied: int
-    empty: int
-    maintenance: int
-    locked: int
-    occupancy_rate: float
-
-
-=======
->>>>>>> ini
 class WarehouseSummaryResponse(BaseModel):
     plant_name: str
     dimensions_m: WarehouseDimensions
     zones: list[WarehouseZoneItem]
-<<<<<<< HEAD
-    slot_stats: SlotStats
-=======
->>>>>>> ini
     pending_tasks: int
     note: str
 
@@ -110,28 +91,16 @@ class RackLayoutCreate(BaseModel):
     cargo_type_code: str | None = None
 
 
-<<<<<<< HEAD
-class RackLayoutUpdate(BaseModel):
-    """PATCH 部分更新：仅显式传入的字段生效（cargo_type_code 传 null 解绑货品）。"""
-    name: str | None = Field(default=None, min_length=1, max_length=64)
-    length_m: float | None = Field(default=None, gt=0.5, le=80)
-    width_m: float | None = Field(default=None, gt=0.5, le=20)
-    height_m: float | None = Field(default=None, gt=0.5, le=14)
-    bays: int | None = Field(default=None, ge=1, le=40)
-    levels: int | None = Field(default=None, ge=1, le=10)
-    slots_per_bay: int | None = Field(default=None, ge=1, le=6)
-    max_load_kg: float | None = Field(default=None, gt=0, le=50000)
-    pos_x: float | None = Field(default=None, ge=-45, le=45)
-    pos_z: float | None = Field(default=None, ge=-70, le=70)
-    rotation_deg: Literal[0, 90] | None = None
-    model_key: str | None = Field(default=None, min_length=1, max_length=64)
-    cargo_type_code: str | None = None
-=======
 class RackPositionUpdate(BaseModel):
     pos_x: float = Field(ge=-45, le=45)
     pos_z: float = Field(ge=-70, le=70)
     rotation_deg: Literal[0, 90] = 0
->>>>>>> ini
+
+
+class RackMetaUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=64)
+    max_load_kg: float = Field(gt=0, le=50000)
+    cargo_type_code: str | None = None
 
 
 class RackLayoutItem(RackLayoutCreate):
@@ -139,44 +108,6 @@ class RackLayoutItem(RackLayoutCreate):
     total_slots: int
 
 
-<<<<<<< HEAD
-class SlotItem(BaseModel):
-    id: UUID
-    rack_id: UUID
-    rack_code: str
-    code: str
-    bay_no: int
-    level_no: int
-    slot_no: int
-    status: SlotStatus
-    cargo_type_code: str | None = None
-    cargo_name: str | None = None
-    cargo_color_hex: str | None = None
-    batch_no: str | None = None
-
-
-class SlotUpdate(BaseModel):
-    """PATCH 部分更新：仅显式传入的字段生效（status=empty 会自动清空货品与批次）。"""
-    status: SlotStatus | None = None
-    cargo_type_code: str | None = Field(default=None, max_length=32)
-    batch_no: str | None = Field(default=None, max_length=64)
-
-
-class SlotSyncResponse(BaseModel):
-    created: int
-    removed: int
-    total: int
-
-
-class LayoutRandomizeResponse(BaseModel):
-    racks: int
-    roads: int
-    total_slots: int
-    occupied_slots: int
-
-
-=======
->>>>>>> ini
 class RoadZoneCreate(BaseModel):
     code: str = Field(min_length=1, max_length=32)
     name: str = Field(min_length=1, max_length=64)
@@ -190,3 +121,43 @@ class RoadZoneCreate(BaseModel):
 class RoadZoneItem(RoadZoneCreate):
     id: UUID
     is_locked: bool
+
+
+SlotStatus = Literal["available", "locked", "disabled", "merged"]
+SlotType = Literal["storage", "pick", "staging", "quarantine"]
+AbcClass = Literal["A", "B", "C"]
+
+
+class WarehouseSlotItem(BaseModel):
+    id: UUID
+    rack_id: UUID
+    bay_idx: int
+    level_idx: int
+    slot_idx: int
+    slot_code: str
+    status: SlotStatus
+    span_slots: int = 1
+    merged_into_slot_id: UUID | None = None
+    slot_type: SlotType = "storage"
+    abc_class: AbcClass = "B"
+    allow_mixed: bool = True
+    max_weight_kg: float = 1000.0
+    remark: str = ""
+
+
+class SlotUpdateRequest(BaseModel):
+    status: Literal["available", "locked", "disabled"]
+    slot_type: SlotType = "storage"
+    abc_class: AbcClass = "B"
+    allow_mixed: bool = True
+    max_weight_kg: float = Field(default=1000.0, gt=0, le=50000)
+    remark: str = Field(default="", max_length=120)
+
+
+class SlotBatchRequest(BaseModel):
+    rack_id: UUID
+    bay_idx: int | None = Field(default=None, ge=1)
+    level_idx: int | None = Field(default=None, ge=1)
+    action: Literal["lock", "unlock", "disable", "set_abc", "set_type"]
+    abc_class: AbcClass | None = None
+    slot_type: SlotType | None = None

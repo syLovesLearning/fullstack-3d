@@ -10,6 +10,7 @@ const activeTab = ref<TabKey>('twin')
 const token = ref('')
 const currentUser = ref<UserInfo | null>(null)
 const initError = ref('')
+const focusRackId = ref('')
 
 const showAuthModal = ref(false)
 const authMode = ref<'login' | 'register'>('login')
@@ -20,8 +21,7 @@ const formGroups = ref('public,engineering')
 const authErr = ref('')
 
 function applyAuth(auth: { access_token: string; user: UserInfo }) {
-  token.value = auth.access_token
-  currentUser.value = auth.user
+  token.value = auth.access_token; currentUser.value = auth.user
 }
 
 async function quickSwitch(preset: 'admin' | 'eng' | 'guest') {
@@ -30,25 +30,21 @@ async function quickSwitch(preset: 'admin' | 'eng' | 'guest') {
     if (preset === 'admin') applyAuth(await devLogin('shenyang', 'admin', ['public', 'engineering', 'finance']))
     else if (preset === 'eng') applyAuth(await devLogin('dev_user', 'user', ['public', 'engineering']))
     else applyAuth(await devLogin('guest', 'readonly', ['public']))
-  } catch (err) {
-    initError.value = err instanceof Error ? err.message : '登录初始化失败'
-  }
+  } catch (err) { initError.value = err instanceof Error ? err.message : '登录初始化失败' }
 }
 
 async function submitAuthForm() {
   authErr.value = ''
   try {
-    if (authMode.value === 'login') {
-      applyAuth(await loginUser(formUser.value.trim(), formPwd.value))
-    } else {
-      const groups = formGroups.value.split(',').map((s) => s.trim()).filter(Boolean)
-      applyAuth(await registerUser(formUser.value.trim(), formPwd.value, formRole.value, groups))
-    }
-    showAuthModal.value = false
-    formPwd.value = ''
-  } catch (err) {
-    authErr.value = err instanceof Error ? err.message : String(err)
-  }
+    if (authMode.value === 'login') applyAuth(await loginUser(formUser.value.trim(), formPwd.value))
+    else applyAuth(await registerUser(formUser.value.trim(), formPwd.value, formRole.value, formGroups.value.split(',').map((s) => s.trim()).filter(Boolean)))
+    showAuthModal.value = false; formPwd.value = ''
+  } catch (err) { authErr.value = err instanceof Error ? err.message : String(err) }
+}
+
+function jumpToRack(rackId: string) {
+  focusRackId.value = rackId
+  activeTab.value = 'warehouse'
 }
 
 onMounted(() => quickSwitch('admin'))
@@ -79,8 +75,8 @@ onMounted(() => quickSwitch('admin'))
     <main :class="activeTab === 'twin' ? 'twin-main' : 'container'">
       <div v-if="initError" class="err-banner">{{ initError }}</div>
       <template v-else-if="token">
-        <FactoryTwinView v-show="activeTab === 'twin'" :token="token" :active="activeTab === 'twin'" />
-        <WarehouseMaintenance v-if="activeTab === 'warehouse'" :token="token" />
+        <FactoryTwinView v-show="activeTab === 'twin'" :token="token" :active="activeTab === 'twin'" @open-rack="jumpToRack" />
+        <WarehouseMaintenance v-if="activeTab === 'warehouse'" :token="token" :focus-rack-id="focusRackId" />
         <ApiTester v-if="activeTab === 'api'" :token="token" />
       </template>
     </main>
@@ -91,14 +87,9 @@ onMounted(() => quickSwitch('admin'))
           <button class="btn" :class="{ 'btn-primary': authMode === 'login' }" @click="authMode = 'login'">登录</button>
           <button class="btn" :class="{ 'btn-primary': authMode === 'register' }" @click="authMode = 'register'">注册</button>
         </div>
-        <input v-model="formUser" class="inp" placeholder="用户名" />
-        <input v-model="formPwd" class="inp" type="password" placeholder="密码" />
+        <input v-model="formUser" class="inp" placeholder="用户名" /><input v-model="formPwd" class="inp" type="password" placeholder="密码" />
         <template v-if="authMode === 'register'">
-          <select v-model="formRole" class="inp">
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-            <option value="readonly">readonly</option>
-          </select>
+          <select v-model="formRole" class="inp"><option value="user">user</option><option value="admin">admin</option><option value="readonly">readonly</option></select>
           <input v-model="formGroups" class="inp" placeholder="所属组 (逗号分隔)" />
         </template>
         <p v-if="authErr" class="err-text">{{ authErr }}</p>

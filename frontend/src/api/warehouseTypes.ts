@@ -40,51 +40,24 @@ export interface RoadZoneItem {
   is_locked: boolean
   drivable_forklift: boolean
 }
-<<<<<<< HEAD
 
-export type SlotStatus = 'empty' | 'occupied' | 'maintenance' | 'locked'
+export type SlotStatus = 'available' | 'locked' | 'disabled' | 'merged'
+export type SlotType = 'storage' | 'pick' | 'staging' | 'quarantine'
+export type AbcClass = 'A' | 'B' | 'C'
 
-export interface SlotItem {
+export interface WarehouseSlotItem {
   id: string
   rack_id: string
-  rack_code: string
-  code: string
-  bay_no: number
-  level_no: number
-  slot_no: number
+  bay_idx: number
+  level_idx: number
+  slot_idx: number
+  slot_code: string
   status: SlotStatus
-  cargo_type_code: string | null
-  cargo_name: string | null
-  cargo_color_hex: string | null
-  batch_no: string | null
+  span_slots: number
+  merged_into_slot_id: string | null
+  slot_type: SlotType
+  abc_class: AbcClass
+  allow_mixed: boolean
+  max_weight_kg: number
+  remark: string
 }
-
-export interface SlotUpdateBody {
-  status?: SlotStatus
-  cargo_type_code?: string | null
-  batch_no?: string | null
-}
-
-export interface SlotStats {
-  total: number
-  occupied: number
-  empty: number
-  maintenance: number
-  locked: number
-  occupancy_rate: number
-}
-
-export interface SlotSyncResult {
-  created: number
-  removed: number
-  total: number
-}
-
-export interface LayoutRandomizeResult {
-  racks: number
-  roads: number
-  total_slots: number
-  occupied_slots: number
-}
-=======
->>>>>>> ini

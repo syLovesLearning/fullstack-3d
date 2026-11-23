@@ -1,15 +1,17 @@
-"""仓储维护数据仓库（显式异步 SQL，支持默认货品、固定道路与幂等导入 8 排标准货架）。"""
+"""仓储维护数据仓库（显式异步 SQL，支持默认货品、固定道路、货架元数据与幂等导入）。"""
 
 from typing import Any
 from uuid import UUID
 
 from psycopg_pool import AsyncConnectionPool
 
-<<<<<<< HEAD
-from src.schemas.models import CargoTypeCreate, RackLayoutCreate, RackLayoutUpdate, RoadZoneCreate
-=======
-from src.schemas.models import CargoTypeCreate, RackLayoutCreate, RackPositionUpdate, RoadZoneCreate
->>>>>>> ini
+from src.schemas.models import (
+    CargoTypeCreate,
+    RackLayoutCreate,
+    RackMetaUpdate,
+    RackPositionUpdate,
+    RoadZoneCreate,
+)
 
 
 class WarehouseRepo:
@@ -83,35 +85,11 @@ class WarehouseRepo:
                 assert row is not None
                 return dict(row)
 
-<<<<<<< HEAD
-    async def delete_cargo_type(self, cargo_id: UUID) -> str:
-        """删除货品类型；被货架绑定或被货位台账引用时拒绝。"""
-        async with self._pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT code FROM cargo_types WHERE id = %s;", (cargo_id,))
-                row = await cur.fetchone()
-                if not row:
-                    return "not_found"
-                code = row["code"]
-                await cur.execute(
-                    """
-                    SELECT EXISTS (SELECT 1 FROM rack_layouts WHERE cargo_type_code = %(code)s)
-                        OR EXISTS (SELECT 1 FROM rack_slots WHERE cargo_type_code = %(code)s) AS in_use;
-                    """,
-                    {"code": code},
-                )
-                usage = await cur.fetchone()
-                if usage and usage["in_use"]:
-                    return "in_use"
-                await cur.execute("DELETE FROM cargo_types WHERE id = %s;", (cargo_id,))
-                return "deleted" if cur.rowcount > 0 else "not_found"
-=======
     async def delete_cargo_type(self, cargo_id: UUID) -> bool:
         async with self._pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute("DELETE FROM cargo_types WHERE id = %s;", (cargo_id,))
                 return cur.rowcount > 0
->>>>>>> ini
 
     async def list_racks(self) -> list[dict[str, Any]]:
         sql = "SELECT id, code, name, length_m, width_m, height_m, bays, levels, slots_per_bay, max_load_kg, pos_x, pos_z, rotation_deg, model_key, cargo_type_code, (bays * levels * slots_per_bay) AS total_slots FROM rack_layouts ORDER BY created_at;"
@@ -129,33 +107,19 @@ class WarehouseRepo:
                 assert row is not None
                 return dict(row)
 
-<<<<<<< HEAD
-    async def update_rack(self, rack_id: UUID, body: RackLayoutUpdate) -> dict[str, Any] | None:
-        """部分更新货架：仅显式传入字段写入（cargo_type_code 显式传 null 解绑）。"""
-        updates = {
-            k: v for k, v in body.model_dump(exclude_unset=True).items()
-            if v is not None or k == "cargo_type_code"
-        }
-        returning = "id, code, name, length_m, width_m, height_m, bays, levels, slots_per_bay, max_load_kg, pos_x, pos_z, rotation_deg, model_key, cargo_type_code, (bays * levels * slots_per_bay) AS total_slots"
-        async with self._pool.connection() as conn:
-            async with conn.cursor() as cur:
-                if not updates:
-                    await cur.execute(f"SELECT {returning} FROM rack_layouts WHERE id = %s;", (rack_id,))
-                    row = await cur.fetchone()
-                    return dict(row) if row else None
-                set_sql = ", ".join(f"{k} = %({k})s" for k in updates)
-                params: dict[str, Any] = {"rack_id": str(rack_id), **updates}
-                await cur.execute(
-                    f"UPDATE rack_layouts SET {set_sql}, updated_at = NOW() WHERE id = %(rack_id)s RETURNING {returning};",
-                    params,
-                )
-=======
     async def update_rack_position(self, rack_id: UUID, body: RackPositionUpdate) -> dict[str, Any] | None:
         sql = "UPDATE rack_layouts SET pos_x = %s, pos_z = %s, rotation_deg = %s, updated_at = NOW() WHERE id = %s RETURNING id, code, name, length_m, width_m, height_m, bays, levels, slots_per_bay, max_load_kg, pos_x, pos_z, rotation_deg, model_key, cargo_type_code, (bays * levels * slots_per_bay) AS total_slots;"
         async with self._pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(sql, (body.pos_x, body.pos_z, body.rotation_deg, rack_id))
->>>>>>> ini
+                row = await cur.fetchone()
+                return dict(row) if row else None
+
+    async def update_rack_meta(self, rack_id: UUID, body: RackMetaUpdate) -> dict[str, Any] | None:
+        sql = "UPDATE rack_layouts SET name = %s, max_load_kg = %s, cargo_type_code = %s, updated_at = NOW() WHERE id = %s RETURNING id, code, name, length_m, width_m, height_m, bays, levels, slots_per_bay, max_load_kg, pos_x, pos_z, rotation_deg, model_key, cargo_type_code, (bays * levels * slots_per_bay) AS total_slots;"
+        async with self._pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql, (body.name, body.max_load_kg, body.cargo_type_code, rack_id))
                 row = await cur.fetchone()
                 return dict(row) if row else None
 

@@ -4,6 +4,7 @@
 
 ## 1. 仓库拓扑
 
+- `run.py`：Windows / macOS 跨平台一键启动与单进程部署入口（`--prod`）。
 - `backend/`：Python 3.12 + FastAPI + PostgreSQL (`psycopg3` 显式异步 SQL)。
 - `frontend/`：Vue 3.5 + TypeScript + Vite + Three.js（3D 厂区数字孪生 + 仓储维护 + 接口测试台）。
 - `docs/`：`ARCHITECTURE.md`（分层设计）、`API_SPEC.md`（前后端唯一契约）、`CODE_INDEX.md`（AST 自动代码地图）。
@@ -18,7 +19,7 @@
 
 ## 3. 常用命令
 
-- 后端启动：`cd backend && make dev`
+- 跨平台一键开发：`python run.py`
+- 跨平台单进程部署：`python run.py --prod`
 - 后端测试：`cd backend && make test`
-- 前端启动：`cd frontend && pnpm dev`
 - 刷新代码地图：`python3 scripts/gen_code_index.py`

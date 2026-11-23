@@ -24,23 +24,17 @@ const cases = ref<ApiCase[]>([
   { id: 'API-04', name: '查询货品类型列表', method: 'GET', path: '/api/v1/warehouse/cargo-types' },
   { id: 'API-05', name: '查询货架摆放列表', method: 'GET', path: '/api/v1/warehouse/racks' },
   { id: 'API-06', name: '查询固定道路区域', method: 'GET', path: '/api/v1/warehouse/roads' },
-<<<<<<< HEAD
-  { id: 'API-07', name: '查询货位台账列表', method: 'GET', path: '/api/v1/warehouse/slots' },
-=======
   { id: 'API-07', name: '一键幂等导入默认布局', method: 'POST', path: '/api/v1/warehouse/seed-demo' },
->>>>>>> ini
+  { id: 'API-08', name: '查询库位级台账明细', method: 'GET', path: '/api/v1/warehouse/slots' },
 ])
 
 async function runSingle(item: ApiCase) {
   try {
     const res = await rawApiRequest(item.method, item.path, props.token, item.body)
-    item.status = res.status
-    item.passed = res.ok
-    item.latencyMs = res.latencyMs
+    item.status = res.status; item.passed = res.ok; item.latencyMs = res.latencyMs
     item.responsePreview = res.bodyText.slice(0, 260)
   } catch (err) {
-    item.status = 0
-    item.passed = false
+    item.status = 0; item.passed = false
     item.responsePreview = err instanceof Error ? err.message : String(err)
   }
 }
@@ -57,11 +51,7 @@ async function runAll() {
     <div class="toolbar">
       <div>
         <h3>接口测试台（统一走 src/api/client.ts）</h3>
-<<<<<<< HEAD
-        <span class="hint">覆盖健康检查、鉴权、货位台账与仓储维护接口</span>
-=======
-        <span class="hint">覆盖健康检查、鉴权、一键导入与仓储维护接口</span>
->>>>>>> ini
+        <span class="hint">覆盖健康检查、鉴权、一键导入、货架道路及库位台账接口</span>
       </div>
       <button class="btn btn-primary" :disabled="running" @click="runAll">
         {{ running ? '执行中...' : '一键跑全部接口' }}
@@ -69,9 +59,7 @@ async function runAll() {
     </div>
 
     <table class="tbl">
-      <thead>
-        <tr><th>编号</th><th>接口</th><th>路径</th><th>状态</th><th>耗时</th><th>响应预览</th><th>操作</th></tr>
-      </thead>
+      <thead><tr><th>编号</th><th>接口</th><th>路径</th><th>状态</th><th>耗时</th><th>响应预览</th><th>操作</th></tr></thead>
       <tbody>
         <tr v-for="c in cases" :key="c.id">
           <td>{{ c.id }}</td>

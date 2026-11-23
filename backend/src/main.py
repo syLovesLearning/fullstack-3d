@@ -1,20 +1,14 @@
-<<<<<<< HEAD
-"""FastAPI 应用入口：装配 Postgres 连接池、鉴权、仓储维护与货位台账路由。"""
-=======
-"""FastAPI 应用入口：仅保留 Postgres 连接池、鉴权与仓储维护骨架路由。"""
->>>>>>> ini
+"""FastAPI 应用入口：托管 Postgres 连接池、API 路由及生产态前端静态产物。"""
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-<<<<<<< HEAD
-from src.api import auth, layout, slots, warehouse
-=======
-from src.api import auth, warehouse
->>>>>>> ini
+from src.api import auth, slots, warehouse
 from src.config import settings
 from src.infra.postgres import close_pg_pool, create_pg_pool
 
@@ -41,13 +35,14 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(warehouse.router)
-<<<<<<< HEAD
 app.include_router(slots.router)
-app.include_router(layout.router)
-=======
->>>>>>> ini
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+_dist_dir = Path(__file__).resolve().parents[2].parent / "frontend" / "dist"
+if _dist_dir.is_dir():
+    app.mount("/", StaticFiles(directory=str(_dist_dir), html=True), name="frontend")

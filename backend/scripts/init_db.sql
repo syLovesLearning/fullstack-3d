@@ -1,6 +1,6 @@
 -- ============================================================================
 -- scripts/init_db.sql
--- 厂区数字孪生与仓储维护 PostgreSQL 建表脚本
+-- 厂区数字孪生与 WMS 库位主数据 PostgreSQL 建表脚本
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS users (
@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 1. 货品类型定义（含尺寸、重量与预留 3D 模型 Key）
 CREATE TABLE IF NOT EXISTS cargo_types (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code            TEXT NOT NULL UNIQUE,
@@ -31,7 +30,6 @@ CREATE TABLE IF NOT EXISTS cargo_types (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. 货架生成与平面坐标布局（含尺寸、库位、单层承重与 3D 模型 Key）
 CREATE TABLE IF NOT EXISTS rack_layouts (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code            TEXT NOT NULL UNIQUE,
@@ -52,7 +50,6 @@ CREATE TABLE IF NOT EXISTS rack_layouts (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3. 特殊区域道路维护（主干道 is_locked=TRUE 宽度固定写死，非库位区域可开叉车）
 CREATE TABLE IF NOT EXISTS road_zones (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code              TEXT NOT NULL UNIQUE,
@@ -65,27 +62,25 @@ CREATE TABLE IF NOT EXISTS road_zones (
     drivable_forklift BOOLEAN NOT NULL DEFAULT TRUE,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-<<<<<<< HEAD
 
--- 4. 货位台账（按货架的跨/层/位自动生成，删除货架级联清理）
-CREATE TABLE IF NOT EXISTS rack_slots (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    rack_id         UUID NOT NULL REFERENCES rack_layouts(id) ON DELETE CASCADE,
-    code            TEXT NOT NULL,
-    bay_no          INTEGER NOT NULL CHECK (bay_no >= 0),
-    level_no        INTEGER NOT NULL CHECK (level_no >= 0),
-    slot_no         INTEGER NOT NULL CHECK (slot_no >= 0),
-    status          TEXT NOT NULL DEFAULT 'empty'
-                    CHECK (status IN ('empty', 'occupied', 'maintenance', 'locked')),
-    cargo_type_code TEXT,
-    batch_no        TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (rack_id, bay_no, level_no, slot_no),
-    UNIQUE (code)
+-- 4. WMS 库位主数据（纯物理库位、合并跨度、作业类型与 ABC 策略）
+CREATE TABLE IF NOT EXISTS warehouse_slots (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rack_id             UUID NOT NULL REFERENCES rack_layouts(id) ON DELETE CASCADE,
+    bay_idx             INTEGER NOT NULL CHECK (bay_idx >= 1),
+    level_idx           INTEGER NOT NULL CHECK (level_idx >= 1),
+    slot_idx            INTEGER NOT NULL CHECK (slot_idx >= 1),
+    slot_code           TEXT NOT NULL UNIQUE,
+    status              TEXT NOT NULL DEFAULT 'available',
+    span_slots          INTEGER NOT NULL DEFAULT 1 CHECK (span_slots IN (1, 2)),
+    merged_into_slot_id UUID REFERENCES warehouse_slots(id) ON DELETE SET NULL,
+    slot_type           TEXT NOT NULL DEFAULT 'storage',
+    abc_class           TEXT NOT NULL DEFAULT 'B',
+    allow_mixed         BOOLEAN NOT NULL DEFAULT TRUE,
+    max_weight_kg       DOUBLE PRECISION NOT NULL DEFAULT 1000,
+    remark              TEXT NOT NULL DEFAULT '',
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (rack_id, bay_idx, level_idx, slot_idx)
 );
 
-CREATE INDEX IF NOT EXISTS idx_rack_slots_rack ON rack_slots (rack_id);
-CREATE INDEX IF NOT EXISTS idx_rack_slots_status ON rack_slots (status);
-=======
->>>>>>> ini
+CREATE INDEX IF NOT EXISTS idx_warehouse_slots_rack ON warehouse_slots (rack_id, bay_idx, level_idx);

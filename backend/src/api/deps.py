@@ -8,11 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 
 from src.config import settings
-<<<<<<< HEAD
-from src.repositories.layout_repo import LayoutRepo
 from src.repositories.slot_repo import SlotRepo
-=======
->>>>>>> ini
 from src.repositories.user_repo import UserRepo
 from src.repositories.warehouse_repo import WarehouseRepo
 from src.schemas.models import AuthContext
@@ -41,17 +37,10 @@ def get_warehouse_repo(request: Request) -> WarehouseRepo:
     return WarehouseRepo(request.app.state.pg_pool)
 
 
-<<<<<<< HEAD
 def get_slot_repo(request: Request) -> SlotRepo:
     return SlotRepo(request.app.state.pg_pool)
 
 
-def get_layout_repo(request: Request) -> LayoutRepo:
-    return LayoutRepo(request.app.state.pg_pool)
-
-
-=======
->>>>>>> ini
 async def get_current_auth(
     cred: HTTPAuthorizationCredentials | None = Depends(_bearer),
 ) -> AuthContext:
