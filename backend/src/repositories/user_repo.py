@@ -100,3 +100,16 @@ class UserRepo:
                 await cur.execute(sql, (user_id,))
                 row = await cur.fetchone()
                 return dict(row) if row else None
+
+    async def ensure_default_admin(self, username: str = "admin", password: str = "admin123456") -> None:
+        pwd_hash = _hash_password(password)
+        tools = ["rag_search", "memory_save", "submit_workflow_form", "query_recent_workflows", "query_inventory"]
+        groups = ["public", "engineering", "finance"]
+        sql = """
+            INSERT INTO users (username, password_hash, role, allowed_tools, groups)
+            VALUES (%s, %s, 'admin', %s, %s)
+            ON CONFLICT (username) DO NOTHING;
+        """
+        async with self._pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql, (username, pwd_hash, tools, groups))

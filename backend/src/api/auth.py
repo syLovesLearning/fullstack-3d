@@ -1,10 +1,11 @@
-"""鉴权接口：支持开发一键切换账号、正式注册与密码登录。"""
+"""鉴权接口：支持正式注册与密码登录（dev-login 受 ENABLE_DEV_LOGIN 开关控制）。"""
 
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.deps import create_access_token, get_current_auth, get_user_repo
+from src.config import settings
 from src.repositories.user_repo import UserRepo
 from src.schemas.models import AuthContext, DevLoginRequest, LoginRequest, RegisterRequest
 
@@ -31,6 +32,8 @@ async def dev_login(
     body: DevLoginRequest,
     user_repo: UserRepo = Depends(get_user_repo),
 ) -> dict[str, Any]:
+    if not settings.enable_dev_login:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="正式环境已禁用免密登录，请使用账号密码登录")
     row = await user_repo.get_or_create_dev_user(
         username=body.username, role=body.role, groups=body.groups
     )

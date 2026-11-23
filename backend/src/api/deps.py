@@ -8,6 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 
 from src.config import settings
+from src.repositories.campus_repo import CampusRepo
 from src.repositories.slot_repo import SlotRepo
 from src.repositories.user_repo import UserRepo
 from src.repositories.warehouse_repo import WarehouseRepo
@@ -39,6 +40,10 @@ def get_warehouse_repo(request: Request) -> WarehouseRepo:
 
 def get_slot_repo(request: Request) -> SlotRepo:
     return SlotRepo(request.app.state.pg_pool)
+
+
+def get_campus_repo(request: Request) -> CampusRepo:
+    return CampusRepo(request.app.state.pg_pool)
 
 
 async def get_current_auth(

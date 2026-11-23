@@ -6,6 +6,7 @@ import {
   type AbcClass, type CargoTypeItem, type RackLayoutItem, type RoadZoneItem, type SlotType, type WarehouseSlotItem,
 } from '../api/client'
 import { checkRackPlacementConflict, RACK_MODEL_OPTIONS } from '../utils/warehouseGeometry'
+import CampusMaintenance from './CampusMaintenance.vue'
 import CargoTypePanel from './CargoTypePanel.vue'
 import RackCrudPanel from './RackCrudPanel.vue'
 import RackFloorCanvas from './RackFloorCanvas.vue'
@@ -14,7 +15,7 @@ import RoadZonePanel from './RoadZonePanel.vue'
 import SlotMaintenanceView from './SlotMaintenanceView.vue'
 
 const props = defineProps<{ token: string; focusRackId?: string }>()
-const subTab = ref<'layout' | 'slots'>('layout')
+const subTab = ref<'campus' | 'layout' | 'slots'>('layout')
 const cargos = ref<CargoTypeItem[]>([])
 const racks = ref<RackLayoutItem[]>([])
 const roads = ref<RoadZoneItem[]>([])
@@ -84,6 +85,7 @@ onMounted(refreshAll)
   <div class="wh-shell">
     <div class="sub-nav">
       <div class="sub-tabs">
+        <button class="btn" :class="{ 'btn-primary': subTab === 'campus' }" @click="subTab = 'campus'">厂区维护（位置 + 道路）</button>
         <button class="btn" :class="{ 'btn-primary': subTab === 'layout' }" @click="subTab = 'layout'">货架平面维护与字典（CRUD + 拖拽）</button>
         <button class="btn" :class="{ 'btn-primary': subTab === 'slots' }" @click="subTab = 'slots'">库位主数据维护（正面图 + 台账）</button>
       </div>
@@ -95,7 +97,9 @@ onMounted(refreshAll)
 
     <p v-if="msg" class="ok-box">{{ msg }}</p><p v-if="err" class="err-box">{{ err }}</p>
 
-    <template v-if="subTab === 'layout'">
+    <CampusMaintenance v-if="subTab === 'campus'" :token="token" />
+
+    <template v-else-if="subTab === 'layout'">
       <div class="sub-card">
         <h4>1. 货架生成（尺寸 / 库位 / 单层承重 / 预留 3D 模型）</h4>
         <div class="form-row">

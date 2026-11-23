@@ -68,3 +68,46 @@ def test_warehouse_crud_and_seed_endpoints() -> None:
         assert rack_resp.status_code == 200 and rack_resp.json()["total_slots"] == 32
     finally:
         app.dependency_overrides.clear()
+
+
+class FakeCampusRepo:
+    def __init__(self) -> None:
+        self.zones = [{"id": uuid4(), "code": "RAW", "name": "1# 综合原料大仓", "zone_type": "warehouse", "x": 38.0, "y": 34.0, "w": 84.0, "h": 86.0, "color": "#1e3a8a", "doors": [{"id": "D1", "side": "bottom", "off": 0.25, "open": True}], "sub_layout": []}]
+        self.roads = [{"id": uuid4(), "code": "MAIN-AISLE", "name": "中央南北主干道", "x": 321.0, "y": 8.0, "w": 18.0, "h": 404.0, "is_locked": True}]
+
+    async def list_zones(self): return self.zones
+    async def update_zone(self, zid: UUID, body):
+        for z in self.zones:
+            if z["id"] == zid:
+                z.update({k: v for k, v in body.model_dump(exclude_none=True).items()})
+                return z
+        return None
+    async def reset_zones(self, randomize: bool = False): return self.zones
+    async def list_roads(self): return self.roads
+    async def create_road(self, body):
+        item = {"id": uuid4(), **body.model_dump(), "is_locked": False}
+        self.roads.append(item)
+        return item
+    async def delete_road(self, rid: UUID):
+        for r in self.roads:
+            if r["id"] == rid:
+                return "locked" if r["is_locked"] else "deleted"
+        return "not_found"
+
+
+def test_campus_endpoints() -> None:
+    from src.api.deps import get_campus_repo
+    fake = FakeCampusRepo()
+    app.dependency_overrides[get_campus_repo] = lambda: fake
+    try:
+        client = TestClient(app, raise_server_exceptions=False)
+        token = create_access_token(AuthContext(user_id=uuid4(), username="admin_u", role="admin"))
+        headers = {"Authorization": f"Bearer {token}"}
+        assert client.get("/api/v1/campus/zones", headers=headers).status_code == 200
+        zid = fake.zones[0]["id"]
+        assert client.patch(f"/api/v1/campus/zones/{zid}", headers=headers, json={"x": 50, "y": 40}).json()["x"] == 50
+        rd = client.post("/api/v1/campus/roads", headers=headers, json={"code": "RD-TEST", "name": "测试通道", "x": 100, "y": 100, "w": 20, "h": 8})
+        assert rd.status_code == 200
+        assert client.delete(f"/api/v1/campus/roads/{rd.json()['id']}", headers=headers).status_code == 200
+    finally:
+        app.dependency_overrides.clear()

@@ -26,11 +26,11 @@ export class MaterialPool {
 
   private makeMetal046B(rx: number, ry: number): THREE.MeshStandardMaterial {
     return new THREE.MeshStandardMaterial({
-      map: this.loadTiled('/textures/steel_albedo.jpg', rx, ry, true),
-      normalMap: this.loadTiled('/textures/steel_normal.jpg', rx, ry),
+      map: this.loadTiled(`${import.meta.env.BASE_URL}textures/steel_albedo.jpg`, rx, ry, true),
+      normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/steel_normal.jpg`, rx, ry),
       normalScale: new THREE.Vector2(0.85, 0.85),
-      roughnessMap: this.loadTiled('/textures/steel_rough.jpg', rx, ry),
-      metalnessMap: this.loadTiled('/textures/steel_metal.jpg', rx, ry),
+      roughnessMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/steel_rough.jpg`, rx, ry),
+      metalnessMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/steel_metal.jpg`, rx, ry),
       roughness: 1.0, metalness: 0.85, envMapIntensity: 0.45,
     })
   }
@@ -50,11 +50,11 @@ export class MaterialPool {
       case 'pallet_wood': return makeMathWood(0xd6b588, 0.65)
       case 'steel_wall':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/corr_albedo.jpg', 6, 1, true),
-          normalMap: this.loadTiled('/textures/corr_normal.jpg', 6, 1),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/corr_albedo.jpg`, 6, 1, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/corr_normal.jpg`, 6, 1),
           normalScale: new THREE.Vector2(1.0, 1.0),
-          roughnessMap: this.loadTiled('/textures/corr_rough.jpg', 6, 1),
-          aoMap: this.loadTiled('/textures/corr_ao.jpg', 6, 1),
+          roughnessMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/corr_rough.jpg`, 6, 1),
+          aoMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/corr_ao.jpg`, 6, 1),
           aoMapIntensity: 0.75, roughness: 1.0, metalness: 0.18, envMapIntensity: 0.42, side: THREE.DoubleSide,
         })
       case 'steel_column': return this.makeMetal046B(1, 4)
@@ -70,51 +70,51 @@ export class MaterialPool {
       case 'glass_window': return new THREE.MeshPhysicalMaterial({ color: 0x0f172a, transparent: true, opacity: 0.42, roughness: 0.15, metalness: 0.12, clearcoat: 0.4 })
       case 'black_hardware':
         return new THREE.MeshStandardMaterial({
-          color: 0x1c1e22, normalMap: this.loadTiled('/textures/plastic_normal.jpg', 2, 2),
+          color: 0x1c1e22, normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/plastic_normal.jpg`, 2, 2),
           normalScale: new THREE.Vector2(0.45, 0.45), roughness: 0.78, metalness: 0.06, envMapIntensity: 0.18,
         })
       case 'belt_green': return new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.58, metalness: 0.05 })
       case 'crate_blue':
         return new THREE.MeshStandardMaterial({
-          color: 0x1d4ed8, normalMap: this.loadTiled('/textures/plastic_normal.jpg', 2, 2),
+          color: 0x1d4ed8, normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/plastic_normal.jpg`, 2, 2),
           normalScale: new THREE.Vector2(0.55, 0.55), roughness: 0.72, metalness: 0.04, envMapIntensity: 0.22,
         })
       case 'drum_teal': return new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.56, metalness: 0.25, envMapIntensity: 0.28 })
       case 'cardboard_box':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/cardboard_box.jpg', 1, 1, true),
-          normalMap: this.loadTiled('/textures/cardboard_normal.jpg', 4, 4),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/cardboard_box.jpg`, 1, 1, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/cardboard_normal.jpg`, 4, 4),
           normalScale: new THREE.Vector2(0.45, 0.45), roughness: 0.88, metalness: 0.02, envMapIntensity: 0.2,
         })
       case 'alert_red': return new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x991b1b, emissiveIntensity: 0.35, roughness: 0.48 })
       case 'rack_beam':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/rack_beam_albedo.jpg', 3, 1, true),
-          normalMap: this.loadTiled('/textures/rack_beam_normal.jpg', 3, 1),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/rack_beam_albedo.jpg`, 3, 1, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/rack_beam_normal.jpg`, 3, 1),
           normalScale: new THREE.Vector2(0.85, 0.85), roughness: 0.68, metalness: 0.1, envMapIntensity: 0.22,
         })
       case 'forklift_paint':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/forklift_paint_albedo.jpg', 1.5, 1.5, true),
-          normalMap: this.loadTiled('/textures/forklift_paint_normal.jpg', 1.5, 1.5),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_paint_albedo.jpg`, 1.5, 1.5, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_paint_normal.jpg`, 1.5, 1.5),
           normalScale: new THREE.Vector2(0.12, 0.12), roughness: 0.68, metalness: 0.04, envMapIntensity: 0.22,
         })
       case 'forklift_iron':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/forklift_iron_albedo.jpg', 2, 2, true),
-          normalMap: this.loadTiled('/textures/forklift_iron_normal.jpg', 2, 2),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_iron_albedo.jpg`, 2, 2, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_iron_normal.jpg`, 2, 2),
           normalScale: new THREE.Vector2(0.35, 0.35), roughness: 0.78, metalness: 0.22, envMapIntensity: 0.22,
         })
       case 'forklift_tire_tread':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/forklift_tire_tread_albedo.jpg', 3, 1, true),
-          normalMap: this.loadTiled('/textures/forklift_tire_tread_normal.jpg', 3, 1),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_tire_tread_albedo.jpg`, 3, 1, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_tire_tread_normal.jpg`, 3, 1),
           normalScale: new THREE.Vector2(1.35, 1.35), roughness: 0.9, metalness: 0.0, envMapIntensity: 0.16,
         })
       case 'forklift_tire_side':
         return new THREE.MeshStandardMaterial({
-          map: this.loadTiled('/textures/forklift_tire_side_albedo.jpg', 1, 1, true),
-          normalMap: this.loadTiled('/textures/forklift_tire_side_normal.jpg', 1, 1),
+          map: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_tire_side_albedo.jpg`, 1, 1, true),
+          normalMap: this.loadTiled(`${import.meta.env.BASE_URL}textures/forklift_tire_side_normal.jpg`, 1, 1),
           normalScale: new THREE.Vector2(0.95, 0.95), roughness: 0.88, metalness: 0.0, envMapIntensity: 0.16,
         })
       case 'forklift_beacon':

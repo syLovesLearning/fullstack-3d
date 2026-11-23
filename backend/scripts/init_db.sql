@@ -84,3 +84,31 @@ CREATE TABLE IF NOT EXISTS warehouse_slots (
 );
 
 CREATE INDEX IF NOT EXISTS idx_warehouse_slots_rack ON warehouse_slots (rack_id, bay_idx, level_idx);
+
+-- 5. 园区厂区位置与道路维护（680m × 420m 物流园区）
+CREATE TABLE IF NOT EXISTS campus_zones (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code            TEXT NOT NULL UNIQUE,
+    name            TEXT NOT NULL,
+    zone_type       TEXT NOT NULL DEFAULT 'warehouse',
+    x               DOUBLE PRECISION NOT NULL,
+    y               DOUBLE PRECISION NOT NULL,
+    w               DOUBLE PRECISION NOT NULL,
+    h               DOUBLE PRECISION NOT NULL,
+    color           TEXT NOT NULL DEFAULT '#1e3a8a',
+    doors_json      JSONB NOT NULL DEFAULT '[]'::jsonb,
+    sub_layout_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS campus_roads (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code            TEXT NOT NULL UNIQUE,
+    name            TEXT NOT NULL,
+    x               DOUBLE PRECISION NOT NULL,
+    y               DOUBLE PRECISION NOT NULL,
+    w               DOUBLE PRECISION NOT NULL,
+    h               DOUBLE PRECISION NOT NULL,
+    is_locked       BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

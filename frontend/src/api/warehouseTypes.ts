@@ -61,3 +61,42 @@ export interface WarehouseSlotItem {
   max_weight_kg: number
   remark: string
 }
+
+export interface CampusDoor {
+  id: string
+  side: 'top' | 'bottom' | 'left' | 'right'
+  off: number
+  open: boolean
+}
+
+export interface CampusSubSlot {
+  kind: 'raw' | 'semi' | 'finished'
+  rx: number
+  ry: number
+  init: number
+}
+
+export interface CampusZoneItem {
+  id: string
+  code: string
+  name: string
+  zone_type: 'warehouse' | 'dock'
+  x: number
+  y: number
+  w: number
+  h: number
+  color: string
+  doors: CampusDoor[]
+  sub_layout: CampusSubSlot[]
+}
+
+export interface CampusRoadItem {
+  id: string
+  code: string
+  name: string
+  x: number
+  y: number
+  w: number
+  h: number
+  is_locked: boolean
+}

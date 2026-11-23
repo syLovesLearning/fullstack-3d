@@ -31,10 +31,10 @@ export function buildCableReels(group: THREE.Group, pool: MaterialPool) {
   }
 
   const ld = new THREE.TextureLoader()
-  const cMap = ld.load('/textures/cable_albedo.jpg'); cMap.colorSpace = THREE.SRGBColorSpace
-  const cNorm = ld.load('/textures/cable_normal.jpg')
-  const cRough = ld.load('/textures/cable_rough.jpg')
-  const cAo = ld.load('/textures/cable_ao.jpg')
+  const cMap = ld.load(`${import.meta.env.BASE_URL}textures/cable_albedo.jpg`); cMap.colorSpace = THREE.SRGBColorSpace
+  const cNorm = ld.load(`${import.meta.env.BASE_URL}textures/cable_normal.jpg`)
+  const cRough = ld.load(`${import.meta.env.BASE_URL}textures/cable_rough.jpg`)
+  const cAo = ld.load(`${import.meta.env.BASE_URL}textures/cable_ao.jpg`)
 
   const flangeMat = pool.get('pallet_wood')
   const coilMat = new THREE.MeshStandardMaterial({

@@ -66,7 +66,7 @@ class SlotRepo:
                                 sc = f"{rk['code']}-B{b:02d}-L{lv}-P{s}"
                                 rows.append((rk["id"], b, lv, s, sc, "available", 1, None, stype, abc, True, unit_w, ""))
                     await cur.executemany(
-                        f"INSERT INTO warehouse_slots ({_COLS.replace('id, ', '')}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (rack_id, bay_idx, level_idx, slot_idx) DO NOTHING;",
+                        f"INSERT INTO warehouse_slots ({_COLS.removeprefix('id, ')}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (rack_id, bay_idx, level_idx, slot_idx) DO NOTHING;",
                         rows,
                     )
 

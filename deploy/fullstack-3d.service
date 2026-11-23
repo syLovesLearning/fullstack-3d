@@ -1,0 +1,13 @@
+[Unit]
+Description=Fullstack 3D Warehouse API
+After=network.target postgresql.service
+
+[Service]
+WorkingDirectory=/opt/fullstack-3d-prod/backend
+Environment="PYTHONPATH=/opt/fullstack-3d-prod/backend"
+ExecStart=/opt/fullstack-3d-prod/backend/.venv/bin/uvicorn src.main:app --host 127.0.0.1 --port 8001 --workers 1
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

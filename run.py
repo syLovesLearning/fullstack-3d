@@ -1,8 +1,8 @@
 """Windows / macOS 统一启动器：自动准备虚拟环境、建库建表并拉起前后端。
 
 用法：
-  python run.py           开发模式（后端 8000 热重载 + 前端 5173 Vite）
-  python run.py --prod    生产模式（构建 frontend/dist 并由 FastAPI 单进程托管于 8000）
+  python run.py           开发模式（后端 8000 热重载 + 前端 5173 Vite，自动免密登录）
+  python run.py --prod    生产模式（构建 frontend/dist 并由 FastAPI 单进程托管于 8000，强制正式登录）
   python run.py --build   仅构建前端静态产物
 """
 
@@ -25,10 +25,12 @@ def _venv_python() -> Path:
     return BACKEND / ".venv" / ("Scripts/python.exe" if IS_WIN else "bin/python")
 
 
-def _backend_env() -> dict[str, str]:
+def _backend_env(dev_login: bool) -> dict[str, str]:
     env = os.environ.copy()
     prev = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = f"{BACKEND}{os.pathsep}{prev}" if prev else str(BACKEND)
+    if dev_login:
+        env["ENABLE_DEV_LOGIN"] = "true"
     return env
 
 
@@ -62,7 +64,7 @@ def _ensure_frontend_deps(pnpm: str) -> None:
 
 def _migrate_db(vpy: Path) -> None:
     print("[db] 正在校验数据库与表结构 ...")
-    subprocess.run([str(vpy), str(BACKEND / "src" / "infra" / "migrate.py")], cwd=BACKEND, env=_backend_env(), check=True)
+    subprocess.run([str(vpy), str(BACKEND / "src" / "infra" / "migrate.py")], cwd=BACKEND, env=_backend_env(False), check=True)
 
 
 def _terminate_procs(procs: list[subprocess.Popen[bytes]]) -> None:
@@ -96,18 +98,23 @@ def main() -> None:
     if not args.skip_migrate:
         _migrate_db(vpy)
 
-    b_env = _backend_env()
     if args.prod:
-        subprocess.run([pnpm, "build"], cwd=FRONTEND, check=True)
-        print("[prod] 启动单进程服务: http://127.0.0.1:8000")
+        b_env = _backend_env(False)
+        f_env = os.environ.copy()
+        f_env["VITE_ENABLE_DEV_LOGIN"] = "false"
+        subprocess.run([pnpm, "build"], cwd=FRONTEND, env=f_env, check=True)
+        print("[prod] 启动单进程服务: http://127.0.0.1:8000/3d/")
         subprocess.run([str(vpy), "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"], cwd=BACKEND, env=b_env, check=True)
         return
 
+    b_env = _backend_env(True)
+    f_env = os.environ.copy()
+    f_env["VITE_ENABLE_DEV_LOGIN"] = "true"
     procs: list[subprocess.Popen[bytes]] = []
     try:
-        print("[dev] 启动后端 http://127.0.0.1:8000 与前端 http://127.0.0.1:5173 (Ctrl+C 退出)")
+        print("[dev] 启动后端 http://127.0.0.1:8000 与前端 http://127.0.0.1:5173/3d/ (Ctrl+C 退出)")
         procs.append(subprocess.Popen([str(vpy), "-m", "uvicorn", "src.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"], cwd=BACKEND, env=b_env))
-        procs.append(subprocess.Popen([pnpm, "dev"], cwd=FRONTEND))
+        procs.append(subprocess.Popen([pnpm, "dev"], cwd=FRONTEND, env=f_env))
         while all(p.poll() is None for p in procs):
             time.sleep(0.5)
     except KeyboardInterrupt:

@@ -24,3 +24,12 @@
 - `POST /api/v1/warehouse/slots/{slot_id}/merge` -> 合并同跨同层相邻下一库位（`span_slots=2`）-> `{"merged": true}`
 - `POST /api/v1/warehouse/slots/{slot_id}/split` -> 拆分合并库位还原为 2 个独立库位 -> `{"split": true}`
 - `POST /api/v1/warehouse/slots/batch` -> `{rack_id, bay_idx?, level_idx?, action: "lock"|"unlock"|"disable"|"set_abc"|"set_type", abc_class?, slot_type?}` -> `{"updated": int}`
+
+## 5. 园区厂区位置与道路维护（680m × 420m 物流园区）
+
+- `GET /api/v1/campus/zones` -> `CampusZoneItem[]`（7 座大仓 + 1 座货车月台，含 `x, y, w, h, doors, sub_layout`）
+- `PATCH /api/v1/campus/zones/{zone_id}` -> `{name?, x?, y?, w?, h?, doors?}` -> `CampusZoneItem`
+- `POST /api/v1/campus/zones/reset` -> 重置为默认园区布局（或随机重排 `{randomize: boolean}`）-> `CampusZoneItem[]`
+- `GET /api/v1/campus/roads` -> `CampusRoadItem[]`（含固定主干道 `is_locked=true` 与自定义园区道路）
+- `POST /api/v1/campus/roads` -> `{code, name, x, y, w, h}` -> `CampusRoadItem`
+- `DELETE /api/v1/campus/roads/{road_id}` -> `{"deleted": true}`（`is_locked=true` 主干道禁止删除）
